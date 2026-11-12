@@ -1,0 +1,47 @@
+name: Daily stock screener update
+on:
+  schedule:
+    - cron: '30 23 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      symbol:
+        description: 'Optional stock symbol to add (e.g. ARGX)'
+        required: false
+      isin:
+        description: 'Optional ISIN (e.g. NL0010832176)'
+        required: false
+      exchange:
+        description: 'Exchange: BRU, AMS, GER, PAR, LSE, NASDAQ, NYSE, etc.'
+        required: false
+      company_name:
+        description: 'Optional company name'
+        required: false
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Add requested stock (if provided)
+        if: ${{ github.event.inputs.symbol != '' }}
+        env:
+          STOCK_SYMBOL: ${{ inputs.symbol }}
+          STOCK_ISIN: ${{ inputs.isin }}
+          STOCK_EXCHANGE: ${{ inputs.exchange }}
+          STOCK_NAME: ${{ inputs.company_name }}
+        run: python sync.py --add --symbol "$STOCK_SYMBOL" --isin "$STOCK_ISIN" --exchange "$STOCK_EXCHANGE" --name "$STOCK_NAME"
+      - name: Download historical prices
+        run: python sync.py
+      - name: Commit refreshed data and watchlist
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add stocks.csv docs/data.json
+          if ! git diff --cached --quiet; then git commit -m "Refresh stock screener data" && git push; fi
