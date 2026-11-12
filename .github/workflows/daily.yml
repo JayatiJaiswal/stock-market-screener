@@ -1,5 +1,12 @@
 name: Daily stock screener update
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'stocks.csv'
+      - 'sync.py'
+      - 'requirements.txt'
+      - '.github/workflows/daily.yml'
   schedule:
     - cron: '30 23 * * 1-5'
   workflow_dispatch:
