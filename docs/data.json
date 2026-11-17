@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-16T23:36:02.708112+00:00",
+  "updated_at": "2026-11-17T23:36:14.603485+00:00",
   "total": 7,
   "success": 7,
   "stocks": [
@@ -9,14 +9,14 @@
       "exchange": "NASDAQ",
       "name": "Apple",
       "provider_symbol": "AAPL",
-      "price": 352.78,
+      "price": 351.91,
       "currency": "USD",
-      "price_date": "2026-11-16",
+      "price_date": "2026-11-17",
       "returns": {
-        "1m": 2.79,
-        "3m": 15.4,
-        "6m": 17.69,
-        "1y": 29.95
+        "1m": 2.54,
+        "3m": 15.25,
+        "6m": 17.4,
+        "1y": 32.03
       },
       "status": "ok",
       "error": null
@@ -27,14 +27,14 @@
       "exchange": "NASDAQ",
       "name": "Microsoft",
       "provider_symbol": "MSFT",
-      "price": 517.99,
+      "price": 506.24,
       "currency": "USD",
-      "price_date": "2026-11-16",
+      "price_date": "2026-11-17",
       "returns": {
-        "1m": -2.09,
-        "3m": 4.76,
-        "6m": 23.27,
-        "1y": 2.37
+        "1m": -4.31,
+        "3m": 5.59,
+        "6m": 20.47,
+        "1y": 0.57
       },
       "status": "ok",
       "error": null
@@ -45,14 +45,14 @@
       "exchange": "AMS",
       "name": "ASML",
       "provider_symbol": "ASML.AS",
-      "price": 1338.8,
+      "price": 1306.6,
       "currency": "EUR",
-      "price_date": "2026-11-13",
+      "price_date": "2026-11-16",
       "returns": {
-        "1m": -11.2,
-        "3m": -16.7,
-        "6m": 1.15,
-        "1y": 52.81
+        "1m": -11.43,
+        "3m": -17.17,
+        "6m": 0.25,
+        "1y": 50.39
       },
       "status": "ok",
       "error": null
@@ -63,14 +63,14 @@
       "exchange": "GER",
       "name": "Beiersdorf",
       "provider_symbol": "BEI.DE",
-      "price": 84.2,
+      "price": 83.46,
       "currency": "EUR",
-      "price_date": "2026-11-13",
+      "price_date": "2026-11-16",
       "returns": {
-        "1m": 5.65,
-        "3m": 7.15,
-        "6m": 20.49,
-        "1y": -7.31
+        "1m": 2.0,
+        "3m": 6.56,
+        "6m": 19.13,
+        "1y": -7.3
       },
       "status": "ok",
       "error": null
@@ -81,14 +81,14 @@
       "exchange": "PAR",
       "name": "BNP Paribas",
       "provider_symbol": "BNP.PA",
-      "price": 95.57,
+      "price": 95.44,
       "currency": "EUR",
-      "price_date": "2026-11-13",
+      "price_date": "2026-11-16",
       "returns": {
-        "1m": 5.92,
-        "3m": -12.14,
-        "6m": 11.24,
-        "1y": 46.11
+        "1m": 6.58,
+        "3m": -12.03,
+        "6m": 13.77,
+        "1y": 47.53
       },
       "status": "ok",
       "error": null
@@ -99,14 +99,14 @@
       "exchange": "BRU",
       "name": "argenx SE",
       "provider_symbol": "ARGX.BR",
-      "price": 878.4,
+      "price": 877.6,
       "currency": "EUR",
-      "price_date": "2026-11-13",
+      "price_date": "2026-11-16",
       "returns": {
-        "1m": 22.24,
-        "3m": 16.44,
-        "6m": 27.82,
-        "1y": 14.26
+        "1m": 20.62,
+        "3m": 20.19,
+        "6m": 26.6,
+        "1y": 12.54
       },
       "status": "ok",
       "error": null
@@ -117,14 +117,14 @@
       "exchange": "LSE",
       "name": "AstraZeneca",
       "provider_symbol": "AZN.L",
-      "price": 14034.0,
+      "price": 13802.0,
       "currency": "GBp",
-      "price_date": "2026-11-16",
+      "price_date": "2026-11-17",
       "returns": {
-        "1m": 12.76,
-        "3m": 22.46,
-        "6m": 2.96,
-        "1y": 3.73
+        "1m": 10.9,
+        "3m": 19.39,
+        "6m": 1.25,
+        "1y": 1.56
       },
       "status": "ok",
       "error": null
