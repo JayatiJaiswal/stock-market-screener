@@ -1,159 +1,60 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Market Pulse — Short-Term Investment Board</title>
+<title>Market Pulse — Short-Term Stock Screener</title>
 <style>
-:root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:#f4f6fa;color:#19253a;color-scheme:light}
-*{box-sizing:border-box}body{margin:0}main{max-width:1500px;margin:auto;padding:22px}
-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
-h1{font-size:26px;margin:0 0 5px}h2{font-size:18px;margin:0 0 15px}
-small,.muted{color:#62738b}a{color:#265eb1}
-nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap}nav a{font-size:14px}
-button,.linkbutton{background:#fff;border:1px solid #cfd7e4;border-radius:8px;padding:10px 13px;font:inherit;cursor:pointer;font-weight:600}
-button.primary{background:#194ba2;color:white;border-color:#194ba2}button.danger{color:#ba2e38}
-button:disabled{opacity:.5;cursor:not-allowed}button:hover:not(:disabled){filter:brightness(.97)}
-section.panel{border:1px solid #e0e7f0;border-radius:14px;background:white;padding:18px;margin-top:20px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:18px 0}
-.kpi{background:white;border:1px solid #e0e7f0;border-radius:12px;padding:14px}
-.kpi>span{font-size:12px;color:#64748b}.kpi>strong{display:block;font-size:23px;margin-top:6px}
-.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
-label{font-size:12px;font-weight:650;color:#41546c;display:block;margin-bottom:5px}
-input,select,textarea{border:1px solid #cfd7e4;border-radius:8px;background:white;padding:10px;font:inherit;width:100%;min-width:0}
-textarea{resize:vertical}.formactions,.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:13px}
-.toolbar input{max-width:300px}.toolbar select{width:auto}
-.tablewrap{overflow:auto;margin-top:12px;border:1px solid #e0e7f0;border-radius:10px}
-table{border-collapse:collapse;min-width:1140px;width:100%;font-size:13px;white-space:nowrap}
-th,td{padding:11px 10px;border-bottom:1px solid #ebeff5;text-align:right}th{background:#f7f9fc;position:sticky;top:0;z-index:1;cursor:pointer}
+:root{font-family:Inter,system-ui,Arial,sans-serif;background:#f5f7fb;color:#142034}
+*{box-sizing:border-box}body{margin:0}main{max-width:1500px;margin:auto;padding:24px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{margin:0;font-size:30px}p,.muted{color:#637083}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+input,select,button{padding:10px 12px;border:1px solid #d6dce7;background:white;border-radius:9px;font:inherit}
+input{flex:1;min-width:240px}button{cursor:pointer;font-weight:600}button:hover{background:#eef3ff}
+.tablewrap{background:white;border:1px solid #e2e8f0;border-radius:13px;overflow:auto;max-height:none}
+table{width:100%;border-collapse:collapse;font-size:14px;white-space:nowrap}
+th,td{padding:12px;text-align:right;border-bottom:1px solid #eff2f6}
+th{position:sticky;top:0;background:#f8fafc;cursor:pointer;z-index:1}
 th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
-.up{color:#087448;font-weight:700}.down{color:#bc3244;font-weight:700}
-.badge{font-size:11px;padding:3px 6px;border-radius:5px;background:#eef2f7;color:#56657b}
-.badge.warn{background:#fff0d2;color:#80550a}.badge.hit{background:#fce4e4;color:#a52228}
-td button{padding:6px 8px;font-size:12px}
-.notice{font-size:13px;color:#625527;padding:10px;background:#fff9e6;border-radius:8px;margin:10px 0}
-#feedback{color:#a0232b;margin-top:9px;font-size:13px}
-footer{font-size:12px;line-height:1.6;color:#63738a;margin:20px 0}
-@media(max-width:650px){main{padding:12px}h1{font-size:22px}}
+.positive{color:#087e4a;font-weight:600}.negative{color:#c23f4b;font-weight:600}.at-multiperiod-low{color:#b91c1c!important;font-weight:900!important;background:#fecaca!important;box-shadow:inset 0 0 0 2px #dc2626}.low-label{display:inline-block;margin-left:6px;padding:2px 5px;border-radius:4px;background:#b91c1c;color:white!important;font-size:11px;font-weight:800}
+.pill{padding:4px 7px;border-radius:6px;font-size:12px;background:#eaf8f0;color:#087e4a}
+.pill.stale{background:#fff0dc;color:#975500}.pill.error{background:#ffe9e9;color:#a02c33}
+#message{margin:14px 0;color:#9b6311}footer{font-size:12px;color:#687589;line-height:1.6;margin-top:22px}
+a{color:#265cb5}.action-link{display:inline-block;padding:10px 12px;border:1px solid #d6dce7;border-radius:9px;background:#fff;text-decoration:none;font-weight:600}.pager{display:flex;align-items:center;justify-content:center;gap:12px;margin:12px 0}.pager button:disabled{opacity:.45;cursor:default}
+@media(max-width:650px){main{padding:12px}h1{font-size:23px}}
 </style></head><body><main>
-<header><div><h1>Short-Term Investment Board</h1><small>Private trade tracking in this browser · Daily closing-price updates when available</small></div>
-<nav><a href="./index.html">Main stock screener</a><a target="_blank" rel="noopener" href="https://github.com/JayatiJaiswal/stock-market-screener/edit/main/stocks.csv">Add tickers to price feed</a><button id="refresh">Refresh prices</button></nav></header>
-<div id="feednotice" class="notice">Loading closing prices...</div>
-<div class="kpis"><div class="kpi"><span>Tracked short-term positions</span><strong id="count">0</strong></div><div class="kpi"><span>Positions with current quotes</span><strong id="quoted">0</strong></div><div class="kpi"><span>At or above target</span><strong id="targets">0</strong></div><div class="kpi"><span>At or below stop</span><strong id="stops">0</strong></div></div>
-<section class="panel"><h2 id="form-title">Add a short-term investment</h2>
-<form id="tradeForm"><div class="formgrid">
-<div><label for="symbol">Stock symbol *</label><input id="symbol" required placeholder="AAPL" maxlength="24"></div>
-<div><label for="isin">ISIN (optional)</label><input id="isin" placeholder="US0378331005" maxlength="12"></div>
-<div><label for="exchange">Exchange *</label><select id="exchange" required><option value="">Choose exchange</option><option>NASDAQ</option><option>NYSE</option><option>AMEX</option><option>AMS</option><option>BRU</option><option>GER</option><option>XETRA</option><option>PAR</option><option>LSE</option><option>SWX</option><option>MIL</option><option>MAD</option><option>STO</option><option>OSL</option><option>CPH</option><option>HEL</option><option>ASX</option><option>TSX</option></select></div>
-<div><label for="name">Company / note</label><input id="name" placeholder="Apple"></div>
-<div><label for="quantity">Shares *</label><input id="quantity" type="number" min="0.000001" step="any" required placeholder="10"></div>
-<div><label for="entry">Entry price (listing currency) *</label><input id="entry" type="number" min="0.000001" step="any" required placeholder="150"></div>
-<div><label for="currency">Currency *</label><select id="currency" required><option>USD</option><option>EUR</option><option>GBp</option><option>GBP</option><option>CHF</option><option>SEK</option><option>NOK</option><option>DKK</option><option>AUD</option><option>CAD</option></select></div>
-<div><label for="bought">Buy date</label><input id="bought" type="date"></div>
-<div><label for="target">Target selling price</label><input id="target" type="number" min="0" step="any" placeholder="175"></div>
-<div><label for="stop">Stop-loss level</label><input id="stop" type="number" min="0" step="any" placeholder="135"></div>
-<div><label for="deadline">Planned exit date</label><input id="deadline" type="date"></div>
-<div><label for="memo">Trade thesis / notes</label><input id="memo" placeholder="Why I bought it"></div>
-</div><div class="formactions"><button class="primary" type="submit" id="save">Save investment</button><button type="button" id="cancel" style="display:none">Cancel edit</button></div><div id="feedback" role="status"></div></form></section>
-<section class="panel"><h2>My short-term positions</h2><div class="toolbar">
-<input id="search" placeholder="Search symbol, ISIN, company">
-<select id="filter"><option value="all">All positions</option><option value="target">Target reached</option><option value="stop">Stop reached</option><option value="missing">Price missing or stale</option></select>
-<button id="export">Export CSV backup</button><label for="import" style="margin:0;border:1px solid #cfd7e4;padding:10px 12px;border-radius:8px;cursor:pointer">Import CSV</label><input type="file" id="import" accept=".csv,text/csv" style="width:1px;opacity:0;position:absolute">
-</div><div class="tablewrap"><table><thead><tr><th>Symbol / ISIN</th><th>Exchange</th><th>Qty</th><th>Entry</th><th>Last close</th><th>Unrealised P/L</th><th>Return</th><th>Target</th><th>Stop</th><th>Exit by</th><th>Signal</th><th>Actions</th></tr></thead><tbody id="rows"></tbody></table></div><p id="countnote" class="muted"></p>
-</section>
-<footer>Not financial advice. A price target or stop level shown here is for monitoring only; this board does not place sell orders or send notifications. Prices are closing quotes, not real-time and may be missing or stale. The feed updates only for tickers in the main repository's stocks.csv; adding a position here does not automatically add a ticker to that feed. P/L excludes fees, taxes, dividends and FX conversion. Positions are stored only in this browser's local storage (not in public GitHub). Export regular CSV backups, especially before clearing browser data or changing devices.</footer>
+<div style="margin-bottom:14px"><a href="./index.html" style="font-weight:700">Back to Main Stock Screener</a></div>
+<header><div><h1>Short-Term Stock Screener</h1><p>Lowest closing prices · 1M / 3M / 6M / 1Y</p></div><div><a class="action-link" href="https://github.com/JayatiJaiswal/stock-market-screener/edit/main/stocks-short-term.csv" target="_blank" rel="noopener noreferrer" title="Add multiple rows using Symbol, ISIN, Exchange and Name">+ Add / bulk-edit stocks</a> <button id="refresh">Refresh display</button> <button id="export">Export CSV</button></div></header>
+
+<div class="controls"><input id="search" placeholder="Search symbol, ISIN, company or exchange">
+<select id="period"><option value="1y">1-year low</option><option value="6m">6-month low</option><option value="3m">3-month low</option><option value="1m">1-month low</option></select>
+<select id="direction"><option value="asc">Lowest price first</option><option value="desc">Highest price first</option></select>
+<select id="filter"><option value="all">All stocks</option><option value="near">Within 10% of period low</option><option value="far">More than 10% above period low</option><option value="missing">Missing/stale data</option></select></div>
+<div class="tablewrap"><table><thead><tr><th data-key="symbol">Ticker</th><th data-key="name">Company / ISIN</th><th data-key="exchange">Exchange</th><th data-key="price">Last closing price</th><th data-key="1m">1M low</th><th data-key="3m">3M low</th><th data-key="6m">6M low</th><th data-key="1y">1Y low</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div id="message"></div>
+<footer>Research dashboard, not investment advice. Each period shows the lowest daily closing price observed within that lookback window, in the listing currency. No percentages. These are closing prices, not intraday lows. A red highlighted Last closing price, with a LOW badge, means it matches the lowest closing price in at least one of the 1-month, 3-month, 6-month or 1-year windows. Hover over red prices to see which periods match. Missing or stale quotes are not highlighted. All quotes are end-of-day and may be delayed or unavailable. Different exchanges use different currencies and calendars. A low return is not proof that a stock is undervalued. Data uses unofficial Yahoo Finance access, which may be rate-limited. To add multiple stocks, click Add / bulk-edit stocks, append rows in the form symbol,isin,exchange,name, then commit changes. The short-term update workflow will fetch their data.</footer>
 <script>
-"use strict";
-const KEY="marketpulse_shortterm_v1";
-const $=id=>document.getElementById(id);
-const escapeHtml=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const fmt=(n,c)=>Number.isFinite(n)?n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})+" "+escapeHtml(c||""):"—";
-const signed=(n,c)=>Number.isFinite(n)?(n>=0?"+":"")+fmt(n,c):"—";
-const num=x=>x===""||x==null?null:Number(x);
-const normalize=x=>String(x||"").trim().toUpperCase();
-const uuid=()=>typeof crypto!=="undefined"&&crypto.randomUUID?crypto.randomUUID():"id-"+Date.now()+"-"+Math.random().toString(36).slice(2);
-let positions=[],feed=[],lastSync=null,editing=null;
-try{const saved=JSON.parse(localStorage.getItem(KEY)||"[]");positions=Array.isArray(saved)?saved:[]}catch{positions=[]}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(positions));return true}catch(e){$("feedback").textContent="Browser storage unavailable. Export a CSV backup.";return false}}
-function quote(p){return feed.find(q=>q.symbol===p.symbol&&q.exchange===p.exchange)||null}
-function live(p){const q=quote(p);return q&&q.status==="ok"&&Number.isFinite(q.price)&&(!q.currency||q.currency===p.currency)?q:null}
-function quoteStatus(p){const q=quote(p);if(!q)return"Not in feed";if(q.currency&&q.currency!==p.currency)return"Currency mismatch";if(q.status!=="ok")return"Stale / unavailable";return Number.isFinite(q.price)?"ok":"No price"}
-function status(p){const q=live(p);if(!q)return"missing";if(p.stop!=null&&q.price<=p.stop)return"stop";if(p.target!=null&&q.price>=p.target)return"target";return"normal"}
+let stocks=[],key='1y',ascending=true;const el=x=>document.getElementById(x);
+const safe=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const value=(r,k)=>['1m','3m','6m','1y'].includes(k)?r.lows?.[k]:r[k];
+const matchingLows=r=>r.status!=='ok'||!Number.isFinite(r.price)?[]:['1m','3m','6m','1y'].filter(k=>Number.isFinite(r.lows?.[k])&&Math.abs(r.price-r.lows[k])<=Math.max(0.0001,Math.abs(r.price)*0.0000001));
+const atLongTermLow=r=>matchingLows(r).length>0;
+const redLowMarkup=r=>atLongTermLow(r)?'<span class="low-label" title="Matches: '+matchingLows(r).join(', ')+'">LOW</span>':'';
+const money=(n,c)=>n==null?'—':Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})+' '+safe(c||'');
 function render(){
- const term=$("search").value.trim().toLowerCase(),filter=$("filter").value;
- let rows=positions.filter(p=>(p.symbol+" "+p.isin+" "+p.name+" "+p.exchange).toLowerCase().includes(term));
- if(filter!=="all")rows=rows.filter(p=>status(p)===filter);
- $("count").textContent=positions.length;$("quoted").textContent=positions.filter(p=>!!live(p)).length;
- $("targets").textContent=positions.filter(p=>status(p)==="target").length;$("stops").textContent=positions.filter(p=>status(p)==="stop").length;
- $("countnote").textContent=rows.length+" of "+positions.length+" positions shown. Each row is a separate investment lot.";
- $("rows").innerHTML=rows.map(p=>{
-  const q=live(p),price=q?q.price:null,pl=q?(q.price-p.entry)*p.quantity:null,ret=q?(q.price/p.entry-1)*100:null;
-  const signal=status(p),label=signal==="target"?"TARGET":signal==="stop"?"STOP":signal==="missing"?quoteStatus(p):"Watching";
-  return '<tr><td><strong>'+escapeHtml(p.symbol)+'</strong><div class="muted">'+escapeHtml(p.name||p.isin||"")+'</div><small>'+escapeHtml(p.isin||"")+'</small></td>'+
-  '<td>'+escapeHtml(p.exchange)+'</td><td>'+escapeHtml(p.quantity)+'</td><td>'+fmt(p.entry,p.currency)+'</td>'+
-  '<td>'+fmt(price,p.currency)+(q?'<div class="muted">'+escapeHtml(q.price_date||"")+'</div>':"")+'</td>'+
-  '<td class="'+(pl==null?"":pl>=0?"up":"down")+'">'+signed(pl,p.currency)+'</td>'+
-  '<td class="'+(ret==null?"":ret>=0?"up":"down")+'">'+(ret==null?"—":(ret>=0?"+":"")+ret.toFixed(2)+"%")+'</td>'+
-  '<td>'+fmt(p.target,p.currency)+'</td><td>'+fmt(p.stop,p.currency)+'</td><td>'+escapeHtml(p.deadline||"—")+'</td>'+
-  '<td><span class="badge '+(signal==="target"||signal==="stop"?"hit":signal==="missing"?"warn":"")+'">'+escapeHtml(label)+'</span></td>'+
-  '<td><button data-edit="'+escapeHtml(p.id)+'">Edit</button> <button class="danger" data-delete="'+escapeHtml(p.id)+'">Remove</button></td></tr>'
- }).join("");
- document.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>edit(b.dataset.edit)));
- document.querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",()=>remove(b.dataset.delete)));
+let term=el('search').value.trim().toLowerCase(), period=el('period').value, filter=el('filter').value;
+let rows=stocks.filter(r=>[r.symbol,r.isin,r.name,r.exchange,r.provider_symbol].join(' ').toLowerCase().includes(term));
+rows=rows.filter(r=>filter==='all'||(filter==='missing'?r.status!=='ok':filter==='near'?value(r,period)!=null&&r.price!=null&&r.price<=value(r,period)*1.10:value(r,period)!=null&&r.price!=null&&r.price>value(r,period)*1.10));
+rows.sort((a,b)=>{let x=value(a,key),y=value(b,key);if(x==null)return 1;if(y==null)return -1;return (typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y)))*(ascending?1:-1)});
+el('rows').innerHTML=rows.map(r=>'<tr><td><b>'+safe(r.symbol)+'</b></td><td>'+safe(r.name)+'<div class="muted">'+safe(r.isin)+'</div></td><td>'+safe(r.exchange)+'</td><td class="'+(atLongTermLow(r)?'at-multiperiod-low':'')+'" title="'+(atLongTermLow(r)?'Matches lowest closing price for: '+matchingLows(r).join(', '):'')+'">'+(r.price==null?'—':safe(Number(r.price).toLocaleString(undefined,{maximumFractionDigits:4}))+' '+safe(r.currency||''))+redLowMarkup(r)+'</td>'+['1m','3m','6m','1y'].map(k=>'<td class="'+(value(r,k)==null?'muted':r.price!=null&&value(r,k)!=null&&r.price<=value(r,k)*1.10?'positive':'muted')+'">'+money(value(r,k),r.currency)+'</td>').join('')+'</tr>').join('');
+el('message').textContent='Showing all '+rows.length+' matching stocks ('+stocks.length+' total) on one page';
 }
 async function refresh(){
- $("feednotice").textContent="Loading closing prices...";
- try{
-  const response=await fetch("data.json?t="+Date.now(),{cache:"no-store"});
-  if(!response.ok)throw Error("HTTP "+response.status);
-  const data=await response.json();feed=Array.isArray(data.stocks)?data.stocks:[];lastSync=data.updated_at;
-  $("feednotice").textContent="Price source: "+feed.length+" tracked symbols. Last data sync: "+(lastSync?new Date(lastSync).toLocaleString():"not available")+". Only symbols listed in the main screener receive price updates.";
- }catch(e){feed=[];$("feednotice").textContent="Couldn't load daily price feed: "+e.message+". Your locally saved positions are unaffected."}
- render();
-}
-function clearForm(){$("tradeForm").reset();$("currency").value="USD";editing=null;$("form-title").textContent="Add a short-term investment";$("save").textContent="Save investment";$("cancel").style.display="none";$("feedback").textContent=""}
-function edit(id){const p=positions.find(p=>p.id===id);if(!p)return;editing=id;
- for(const k of ["symbol","isin","exchange","name","quantity","entry","currency","bought","target","stop","deadline","memo"])$(k).value=p[k]??"";
- $("form-title").textContent="Edit investment";$("save").textContent="Save changes";$("cancel").style.display="inline-block";window.scrollTo({top:0,behavior:"smooth"})}
-function remove(id){if(!confirm("Remove this investment from your local board?"))return;positions=positions.filter(x=>x.id!==id);persist();render()}
-$("tradeForm").addEventListener("submit",e=>{
- e.preventDefault();
- const p={id:editing||uuid(),symbol:normalize($("symbol").value).split("|")[0].trim(),isin:normalize($("isin").value),exchange:normalize($("exchange").value),
- name:$("name").value.trim(),quantity:num($("quantity").value),entry:num($("entry").value),currency:$("currency").value,
- bought:$("bought").value,target:num($("target").value),stop:num($("stop").value),deadline:$("deadline").value,memo:$("memo").value.trim()};
- if(!/^[A-Z0-9.^-]{1,24}$/.test(p.symbol)||!p.exchange||!Number.isFinite(p.quantity)||p.quantity<=0||!Number.isFinite(p.entry)||p.entry<=0){$("feedback").textContent="Please enter a valid ticker, exchange, positive quantity and entry price.";return}
- if(p.isin&&!/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(p.isin)){$("feedback").textContent="ISIN must contain 12 characters (e.g. US0378331005).";return}
- if([p.target,p.stop].some(v=>v!=null&&(!Number.isFinite(v)||v<0))){$("feedback").textContent="Target and stop must be valid non-negative prices.";return}
- if(editing){positions=positions.map(x=>x.id===editing?p:x)}else{positions.push(p)}
- persist();clearForm();render();
-});
-$("cancel").onclick=clearForm;$("search").oninput=render;$("filter").onchange=render;$("refresh").onclick=refresh;
-const csvEscape=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
-$("export").onclick=()=>{
- const keys=["symbol","isin","exchange","name","quantity","entry","currency","bought","target","stop","deadline","memo"];
- const lines=[keys.join(","),...positions.map(p=>keys.map(k=>csvEscape(p[k])).join(","))];
- const url=URL.createObjectURL(new Blob([lines.join("\n")],{type:"text/csv;charset=utf-8"}));
- const a=document.createElement("a");a.href=url;a.download="short-term-investments.csv";a.click();URL.revokeObjectURL(url);
-};
-function parseCSV(text){
- const out=[];let row=[],cell="",quotes=false;
- for(let i=0;i<text.length;i++){const c=text[i];if(quotes){if(c==='"'&&text[i+1]==='"'){cell+='"';i++}else if(c==='"')quotes=false;else cell+=c}
- else if(c==='"')quotes=true;else if(c===","){row.push(cell);cell=""}else if(c==="\n"){row.push(cell.replace(/\r$/,""));out.push(row);row=[];cell=""}else cell+=c}
- if(quotes)throw Error("Unclosed CSV quote");if(cell||row.length){row.push(cell);out.push(row)}return out;
-}
-$("import").addEventListener("change",async e=>{
- const file=e.target.files?.[0];if(!file)return;
- try{
-  const records=parseCSV(await file.text());const headers=records.shift()?.map(s=>s.trim().toLowerCase().replace(/^\ufeff/,""))||[];
-  const required=["symbol","exchange","quantity","entry","currency"];
-  if(!required.every(k=>headers.includes(k)))throw Error("CSV must include: "+required.join(", "));
-  let imported=0;
-  for(const raw of records){if(!raw.some(x=>x.trim()))continue;const row=Object.fromEntries(headers.map((h,i)=>[h,raw[i]??""]));
-   const p={id:uuid(),symbol:normalize(row.symbol),isin:normalize(row.isin),exchange:normalize(row.exchange),name:row.name||"",
-     quantity:num(row.quantity),entry:num(row.entry),currency:row.currency||"USD",bought:row.bought||"",
-     target:num(row.target),stop:num(row.stop),deadline:row.deadline||"",memo:row.memo||""};
-   if(!/^[A-Z0-9.^-]{1,24}$/.test(p.symbol)||p.quantity<=0||p.entry<=0||!p.exchange||!Number.isFinite(p.quantity)||!Number.isFinite(p.entry))continue;
-   positions.push(p);imported++;
-  }
-  persist();render();$("feedback").textContent=imported+" rows imported. Check imported positions for duplicates.";
- }catch(err){$("feedback").textContent="Import error: "+err.message}finally{e.target.value=""}
-});
-render();refresh();
+try {let response=await fetch('short-term-data.json?ts='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);
+let data=await response.json();stocks=data.stocks||[];const oldFormat=stocks.some(r=>r.returns&&!r.lows);render();
+if(oldFormat)el('message').textContent='Historical low prices have not been recalculated yet. The last saved data is still in the old percentage format. Run the Short-term stock screener update GitHub Action; this dashboard intentionally does not display percentages.';else if(!data.updated_at)el('message').textContent='Ready for first data update. Run the GitHub Actions workflow.';
+}catch(err){el('message').textContent='Unable to load price data: '+err.message}}
+for(const id of ['search','period','direction','filter'])el(id).addEventListener(id==='search'?'input':'change',()=>{if(id==='period'||id==='direction'){key=el('period').value;ascending=el('direction').value==='asc'}render()});
+document.querySelectorAll('th[data-key]').forEach(th=>th.onclick=()=>{const next=th.dataset.key;ascending=key===next?!ascending:true;key=next;render()});
+el('refresh').onclick=refresh;
+el('export').onclick=()=>{let keys=['symbol','isin','exchange','name','price','currency','1m','3m','6m','1y'];let lines=[keys.join(','),...stocks.map(r=>keys.map(k=>JSON.stringify(value(r,k)??'')).join(','))];let blob=new Blob([lines.join('\n')],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='short-term-stock-screener.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+refresh();
 </script></main></body></html>
