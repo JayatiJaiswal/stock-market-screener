@@ -54,6 +54,6 @@ if(oldFormat)el('message').textContent='Historical low prices have not been reca
 for(const id of ['search','period','direction','filter'])el(id).addEventListener(id==='search'?'input':'change',()=>{if(id==='period'||id==='direction'){key=el('period').value;ascending=el('direction').value==='asc'}render()});
 document.querySelectorAll('th[data-key]').forEach(th=>th.onclick=()=>{const next=th.dataset.key;ascending=key===next?!ascending:true;key=next;render()});
 el('refresh').onclick=refresh;
-el('export').onclick=()=>{let keys=['symbol','isin','exchange','name','price','currency','price_date','1m','3m','6m','1y','status','error'];let lines=[keys.join(','),...stocks.map(r=>keys.map(k=>JSON.stringify(value(r,k)??'')).join(','))];let blob=new Blob([lines.join('\n')],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='stock-screener.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+el('export').onclick=()=>{let keys=['symbol','isin','exchange','name','price','currency','1m','3m','6m','1y','status','error'];let lines=[keys.join(','),...stocks.map(r=>keys.map(k=>JSON.stringify(value(r,k)??'')).join(','))];let blob=new Blob([lines.join('\n')],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='stock-screener.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 refresh();
 </script></main></body></html>
