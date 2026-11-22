@@ -38,13 +38,13 @@ Exchange codes supported: NASDAQ, NYSE, AMEX, AMS, BRU, PAR, GER, XETRA, LSE, SW
 ## Calculation
 The dashboard shows:
 - Last adjusted closing price, exchange currency, and price date
-- 1-month, 3-month, 6-month and 1-year percentage return
-- Sort by biggest fall / biggest gain
-- Filter rising, falling, or missing/stale results
+- 1-month, 3-month, 6-month and 1-year minimum daily closing prices
+- Sort by lowest / highest price for any selected period
+- Filter stocks trading within 10% of their period low, farther from the low, or missing/stale results
 - Search by symbol, ISIN, name or exchange
 - Export CSV
 
-Returns = **(latest adjusted close / adjusted close at or before the calendar lookback date − 1) × 100**. The adjusted price may account for dividends and splits, depending on the source. Prices are **not live**, and market holidays vary by exchange.
+Each period displays the **minimum unadjusted daily closing price** observed over the trailing 1, 3, 6 or 12 calendar months, including the latest session. If full historical coverage is unavailable for a window, that field is blank. These are not intraday lows or percent returns. Last close and period lows are denominated in the listing currency (including GBp/pence where applicable). Prices are **not live**, and market holidays vary by exchange.
 
 ## Data safety and limitations
 - Uses an **unofficial Yahoo Finance data source via yfinance**. Availability is not guaranteed; it can be rate-limited or interrupted.
