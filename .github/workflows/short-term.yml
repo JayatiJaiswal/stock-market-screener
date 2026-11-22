@@ -1,0 +1,61 @@
+name: Short-term stock screener update
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'stocks-short-term.csv'
+      - 'sync-short-term.py'
+      - 'requirements.txt'
+      - '.github/workflows/short-term.yml'
+  schedule:
+    - cron: '45 23 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      symbol:
+        description: 'Optional symbol to add to short-term watchlist'
+        required: false
+      isin:
+        description: 'Optional ISIN'
+        required: false
+      exchange:
+        description: 'Exchange code (e.g. NASDAQ, AMS, BRU)'
+        required: false
+      company_name:
+        description: 'Optional company name'
+        required: false
+permissions:
+  contents: write
+concurrency:
+  group: short-term-stock-screener
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Add requested stock (if provided)
+        if: ${{ github.event.inputs.symbol != '' }}
+        env:
+          STOCK_SYMBOL: ${{ inputs.symbol }}
+          STOCK_ISIN: ${{ inputs.isin }}
+          STOCK_EXCHANGE: ${{ inputs.exchange }}
+          STOCK_NAME: ${{ inputs.company_name }}
+        run: python sync-short-term.py --add --symbol "$STOCK_SYMBOL" --isin "$STOCK_ISIN" --exchange "$STOCK_EXCHANGE" --name "$STOCK_NAME"
+      - name: Update short-term prices
+        run: python sync-short-term.py
+      - name: Commit short-term data and watchlist
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add stocks-short-term.csv docs/short-term-data.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Refresh short-term stock screener data"
+            git pull --rebase
+            git push
+          fi
