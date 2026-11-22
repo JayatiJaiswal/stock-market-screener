@@ -12,7 +12,7 @@ h1{margin:0;font-size:30px}p,.muted{color:#637083}
 .controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
 input,select,button{padding:10px 12px;border:1px solid #d6dce7;background:white;border-radius:9px;font:inherit}
 input{flex:1;min-width:240px}button{cursor:pointer;font-weight:600}button:hover{background:#eef3ff}
-.tablewrap{background:white;border:1px solid #e2e8f0;border-radius:13px;overflow:auto;max-height:70vh}
+.tablewrap{background:white;border:1px solid #e2e8f0;border-radius:13px;overflow:auto;max-height:none}
 table{width:100%;border-collapse:collapse;font-size:14px;white-space:nowrap}
 th,td{padding:12px;text-align:right;border-bottom:1px solid #eff2f6}
 th{position:sticky;top:0;background:#f8fafc;cursor:pointer;z-index:1}
@@ -31,10 +31,10 @@ a{color:#265cb5}.action-link{display:inline-block;padding:10px 12px;border:1px s
 <select id="direction"><option value="asc">Lowest price first</option><option value="desc">Highest price first</option></select>
 <select id="filter"><option value="all">All stocks</option><option value="near">Within 10% of period low</option><option value="far">More than 10% above period low</option><option value="missing">Missing/stale data</option></select></div>
 <div class="tablewrap"><table><thead><tr><th data-key="symbol">Ticker</th><th data-key="name">Company / ISIN</th><th data-key="exchange">Exchange</th><th data-key="price">Last closing price</th><th data-key="1m">1M low</th><th data-key="3m">3M low</th><th data-key="6m">6M low</th><th data-key="1y">1Y low</th></tr></thead><tbody id="rows"></tbody></table></div>
-<div class="pager"><button id="prev" type="button">Previous</button><span id="page-label">Page 1</span><button id="next" type="button">Next</button></div><div id="message"></div>
+<div id="message"></div>
 <footer>Research dashboard, not investment advice. Each period shows the lowest daily closing price observed within that lookback window, in the listing currency. No percentages. These are closing prices, not intraday lows. A red highlighted Last closing price, with a LOW badge, means it matches the lowest closing price in at least one of the 1-month, 3-month, 6-month or 1-year windows. Hover over red prices to see which periods match. Missing or stale quotes are not highlighted. All quotes are end-of-day and may be delayed or unavailable. Different exchanges use different currencies and calendars. A low return is not proof that a stock is undervalued. Data uses unofficial Yahoo Finance access, which may be rate-limited. To add multiple stocks, click Add / bulk-edit stocks, append rows in the form symbol,isin,exchange,name, then commit changes. The update workflow will fetch their data.</footer>
 <script>
-let stocks=[],key='1y',ascending=true,page=1,pageSize=100;const el=x=>document.getElementById(x);
+let stocks=[],key='1y',ascending=true;const el=x=>document.getElementById(x);
 const safe=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const value=(r,k)=>['1m','3m','6m','1y'].includes(k)?r.lows?.[k]:r[k];
 const matchingLows=r=>r.status!=='ok'||!Number.isFinite(r.price)?[]:['1m','3m','6m','1y'].filter(k=>Number.isFinite(r.lows?.[k])&&Math.abs(r.price-r.lows[k])<=Math.max(0.0001,Math.abs(r.price)*0.0000001));
@@ -46,19 +46,16 @@ let term=el('search').value.trim().toLowerCase(), period=el('period').value, fil
 let rows=stocks.filter(r=>[r.symbol,r.isin,r.name,r.exchange,r.provider_symbol].join(' ').toLowerCase().includes(term));
 rows=rows.filter(r=>filter==='all'||(filter==='missing'?r.status!=='ok':filter==='near'?value(r,period)!=null&&r.price!=null&&r.price<=value(r,period)*1.10:value(r,period)!=null&&r.price!=null&&r.price>value(r,period)*1.10));
 rows.sort((a,b)=>{let x=value(a,key),y=value(b,key);if(x==null)return 1;if(y==null)return -1;return (typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y)))*(ascending?1:-1)});
-const pageCount=Math.max(1,Math.ceil(rows.length/pageSize));page=Math.min(Math.max(1,page),pageCount);el('page-label').textContent='Page '+page+' of '+pageCount;el('prev').disabled=page===1;el('next').disabled=page===pageCount;
-el('rows').innerHTML=rows.slice((page-1)*pageSize,page*pageSize).map(r=>'<tr><td><b>'+safe(r.symbol)+'</b></td><td>'+safe(r.name)+'<div class="muted">'+safe(r.isin)+'</div></td><td>'+safe(r.exchange)+'</td><td class="'+(atLongTermLow(r)?'at-multiperiod-low':'')+'" title="'+(atLongTermLow(r)?'Matches lowest closing price for: '+matchingLows(r).join(', '):'')+'">'+(r.price==null?'—':safe(Number(r.price).toLocaleString(undefined,{maximumFractionDigits:4}))+' '+safe(r.currency||''))+redLowMarkup(r)+'</td>'+['1m','3m','6m','1y'].map(k=>'<td class="'+(value(r,k)==null?'muted':r.price!=null&&value(r,k)!=null&&r.price<=value(r,k)*1.10?'positive':'muted')+'">'+money(value(r,k),r.currency)+'</td>').join('')+'</tr>').join('');
-el('message').textContent='Showing '+(rows.length?((page-1)*pageSize+1):0)+'–'+Math.min(page*pageSize,rows.length)+' of '+rows.length+' matching stocks ('+stocks.length+' total)';
+el('rows').innerHTML=rows.map(r=>'<tr><td><b>'+safe(r.symbol)+'</b></td><td>'+safe(r.name)+'<div class="muted">'+safe(r.isin)+'</div></td><td>'+safe(r.exchange)+'</td><td class="'+(atLongTermLow(r)?'at-multiperiod-low':'')+'" title="'+(atLongTermLow(r)?'Matches lowest closing price for: '+matchingLows(r).join(', '):'')+'">'+(r.price==null?'—':safe(Number(r.price).toLocaleString(undefined,{maximumFractionDigits:4}))+' '+safe(r.currency||''))+redLowMarkup(r)+'</td>'+['1m','3m','6m','1y'].map(k=>'<td class="'+(value(r,k)==null?'muted':r.price!=null&&value(r,k)!=null&&r.price<=value(r,k)*1.10?'positive':'muted')+'">'+money(value(r,k),r.currency)+'</td>').join('')+'</tr>').join('');
+el('message').textContent='Showing all '+rows.length+' matching stocks ('+stocks.length+' total) on one page';
 }
 async function refresh(){
 try {let response=await fetch('data.json?ts='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);
 let data=await response.json();stocks=data.stocks||[];const oldFormat=stocks.some(r=>r.returns&&!r.lows);el('total').textContent=data.total??stocks.length;el('success').textContent=data.success??0;el('falling').textContent=stocks.filter(atLongTermLow).length;el('updated').textContent=data.updated_at?new Date(data.updated_at).toLocaleString('en-GB',{timeZone:'UTC',dateStyle:'medium',timeStyle:'short'})+' UTC':'Not yet synced';render();
 if(oldFormat)el('message').textContent='Historical low prices have not been recalculated yet. The last saved data is still in the old percentage format. Run the Daily stock screener update GitHub Action; this dashboard intentionally does not display percentages.';else if(!data.updated_at)el('message').textContent='Ready for first data update. Run the GitHub Actions workflow.';
 }catch(err){el('message').textContent='Unable to load price data: '+err.message}}
-for(const id of ['search','period','direction','filter'])el(id).addEventListener(id==='search'?'input':'change',()=>{if(id==='period'||id==='direction'){key=el('period').value;ascending=el('direction').value==='asc'}page=1;render()});
+for(const id of ['search','period','direction','filter'])el(id).addEventListener(id==='search'?'input':'change',()=>{if(id==='period'||id==='direction'){key=el('period').value;ascending=el('direction').value==='asc'}render()});
 document.querySelectorAll('th[data-key]').forEach(th=>th.onclick=()=>{const next=th.dataset.key;ascending=key===next?!ascending:true;key=next;render()});
-el('prev').onclick=()=>{if(page>1){page--;render()}};
-el('next').onclick=()=>{page++;render()};
 el('refresh').onclick=refresh;
 el('export').onclick=()=>{let keys=['symbol','isin','exchange','name','price','currency','1m','3m','6m','1y'];let lines=[keys.join(','),...stocks.map(r=>keys.map(k=>JSON.stringify(value(r,k)??'')).join(','))];let blob=new Blob([lines.join('\n')],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='stock-screener.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 refresh();
