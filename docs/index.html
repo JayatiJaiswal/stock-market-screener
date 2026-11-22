@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Market Pulse — Daily Stock Screener</title>
+<title>Market Pulse — Numeric Price Lows</title>
 <style>
 :root{font-family:Inter,system-ui,Arial,sans-serif;background:#f5f7fb;color:#142034}
 *{box-sizing:border-box}body{margin:0}main{max-width:1500px;margin:auto;padding:24px}
@@ -24,7 +24,7 @@ th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
 a{color:#265cb5}
 @media(max-width:650px){main{padding:12px}.stats{grid-template-columns:repeat(2,1fr)}h1{font-size:23px}}
 </style></head><body><main>
-<header><div><h1>Market Pulse</h1><p>Lowest closing prices · 1M / 3M / 6M / 1Y</p></div><div><button id="refresh">Refresh display</button> <button id="export">Export CSV</button></div></header>
+<header><div><h1>Market Pulse — Price Lows</h1><p>Lowest closing prices · 1M / 3M / 6M / 1Y</p></div><div><button id="refresh">Refresh display</button> <button id="export">Export CSV</button></div></header>
 <section class="stats"><div class="stat"><span>Tracked stocks</span><strong id="total">—</strong></div><div class="stat"><span>Updated successfully</span><strong id="success">—</strong></div><div class="stat"><span>Near 1-year low (≤10%)</span><strong id="falling">—</strong></div><div class="stat"><span>Last sync (UTC)</span><strong id="updated" style="font-size:16px">—</strong></div></section>
 <div class="controls"><input id="search" placeholder="Search symbol, ISIN, company or exchange">
 <select id="period"><option value="1y">1-year low</option><option value="6m">6-month low</option><option value="3m">3-month low</option><option value="1m">1-month low</option></select>
@@ -48,8 +48,8 @@ el('message').textContent='Showing '+rows.length+' of '+stocks.length+' stocks';
 }
 async function refresh(){
 try {let response=await fetch('data.json?ts='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);
-let data=await response.json();stocks=data.stocks||[];el('total').textContent=data.total??stocks.length;el('success').textContent=data.success??0;el('falling').textContent=stocks.filter(r=>value(r,'1y')!=null&&r.price!=null&&r.price<=value(r,'1y')*1.10).length;el('updated').textContent=data.updated_at?new Date(data.updated_at).toLocaleString('en-GB',{timeZone:'UTC',dateStyle:'medium',timeStyle:'short'})+' UTC':'Not yet synced';render();
-if(!data.updated_at)el('message').textContent='Ready for first data update. Run the GitHub Actions workflow.';
+let data=await response.json();stocks=data.stocks||[];const oldFormat=stocks.some(r=>r.returns&&!r.lows);el('total').textContent=data.total??stocks.length;el('success').textContent=data.success??0;el('falling').textContent=stocks.filter(r=>value(r,'1y')!=null&&r.price!=null&&r.price<=value(r,'1y')*1.10).length;el('updated').textContent=data.updated_at?new Date(data.updated_at).toLocaleString('en-GB',{timeZone:'UTC',dateStyle:'medium',timeStyle:'short'})+' UTC':'Not yet synced';render();
+if(oldFormat)el('message').textContent='Historical low prices have not been recalculated yet. The last saved data is still in the old percentage format. Run the Daily stock screener update GitHub Action; this dashboard intentionally does not display percentages.';else if(!data.updated_at)el('message').textContent='Ready for first data update. Run the GitHub Actions workflow.';
 }catch(err){el('message').textContent='Unable to load price data: '+err.message}}
 for(const id of ['search','period','direction','filter'])el(id).addEventListener(id==='search'?'input':'change',()=>{if(id==='period'||id==='direction'){key=el('period').value;ascending=el('direction').value==='asc'}render()});
 document.querySelectorAll('th[data-key]').forEach(th=>th.onclick=()=>{const next=th.dataset.key;ascending=key===next?!ascending:true;key=next;render()});
