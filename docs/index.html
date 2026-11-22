@@ -18,21 +18,21 @@ th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
 .pill{padding:4px 7px;border-radius:6px;font-size:12px;background:#eaf8f0;color:#087e4a}
 .pill.stale{background:#fff0dc;color:#975500}.pill.error{background:#ffe9e9;color:#a02c33}
 #message{margin:14px 0;color:#9b6311}footer{font-size:12px;color:#687589;line-height:1.6;margin-top:22px}
-a{color:#265cb5}.action-link{display:inline-block;padding:10px 12px;border:1px solid #d6dce7;border-radius:9px;background:#fff;text-decoration:none;font-weight:600}.pager{display:flex;align-items:center;justify-content:center;gap:12px;margin:12px 0}.pager button:disabled{opacity:.45;cursor:default}
+a{color:#265cb5}.boards{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.boardtab{padding:10px 16px;border:1px solid #cad5e5;background:white;border-radius:9px;font-weight:700;cursor:pointer}.boardtab.active{background:#194ba2;color:white;border-color:#194ba2}.emptyhint{background:#fff;border:1px solid #dbe4ef;padding:16px;border-radius:10px;margin:12px 0}.action-link{display:inline-block;padding:10px 12px;border:1px solid #d6dce7;border-radius:9px;background:#fff;text-decoration:none;font-weight:600}.pager{display:flex;align-items:center;justify-content:center;gap:12px;margin:12px 0}.pager button:disabled{opacity:.45;cursor:default}
 @media(max-width:650px){main{padding:12px}h1{font-size:23px}}
 </style></head><body><main>
-<div style="margin-bottom:14px"><a href="./short-term.html" style="font-weight:700">Open Short-Term Investment Board</a></div>
-<header><div><h1>Market Pulse — Price Lows</h1><p>Lowest closing prices · 1M / 3M / 6M / 1Y</p></div><div><a class="action-link" href="https://github.com/JayatiJaiswal/stock-market-screener/edit/main/stocks.csv" target="_blank" rel="noopener noreferrer" title="Add multiple rows using Symbol, ISIN, Exchange and Name">+ Add / bulk-edit stocks</a> <button id="refresh">Refresh display</button> <button id="export">Export CSV</button></div></header>
+<div class="boards"><button type="button" class="boardtab active" id="main-tab">Main Stock Screener</button><button type="button" class="boardtab" id="short-tab">Short-Term Stock Screener</button></div>
+<header><div><h1 id="board-title">Market Pulse — Price Lows</h1><p>Lowest closing prices · 1M / 3M / 6M / 1Y</p></div><div><a id="add-stocks" class="action-link" href="https://github.com/JayatiJaiswal/stock-market-screener/edit/main/stocks.csv" target="_blank" rel="noopener noreferrer" title="Add multiple rows using Symbol, ISIN, Exchange and Name">+ Add / bulk-edit stocks</a> <button id="refresh">Refresh display</button> <button id="export">Export CSV</button></div></header>
 
 <div class="controls"><input id="search" placeholder="Search symbol, ISIN, company or exchange">
 <select id="period"><option value="1y">1-year low</option><option value="6m">6-month low</option><option value="3m">3-month low</option><option value="1m">1-month low</option></select>
 <select id="direction"><option value="asc">Lowest price first</option><option value="desc">Highest price first</option></select>
 <select id="filter"><option value="all">All stocks</option><option value="near">Within 10% of period low</option><option value="far">More than 10% above period low</option><option value="missing">Missing/stale data</option></select></div>
 <div class="tablewrap"><table><thead><tr><th data-key="symbol">Ticker</th><th data-key="name">Company / ISIN</th><th data-key="exchange">Exchange</th><th data-key="price">Last closing price</th><th data-key="1m">1M low</th><th data-key="3m">3M low</th><th data-key="6m">6M low</th><th data-key="1y">1Y low</th></tr></thead><tbody id="rows"></tbody></table></div>
-<div id="message"></div>
+<div id="emptyhint" class="emptyhint" style="display:none"><strong>No short-term stocks yet.</strong><p>Your short-term watchlist is separate from the main stock screener. Click <strong>+ Add / bulk-edit stocks</strong> to add symbols and ISINs, then the daily update workflow will fill this board.</p></div><div id="message"></div>
 <footer>Research dashboard, not investment advice. Each period shows the lowest daily closing price observed within that lookback window, in the listing currency. No percentages. These are closing prices, not intraday lows. A red highlighted Last closing price, with a LOW badge, means it matches the lowest closing price in at least one of the 1-month, 3-month, 6-month or 1-year windows. Hover over red prices to see which periods match. Missing or stale quotes are not highlighted. All quotes are end-of-day and may be delayed or unavailable. Different exchanges use different currencies and calendars. A low return is not proof that a stock is undervalued. Data uses unofficial Yahoo Finance access, which may be rate-limited. To add multiple stocks, click Add / bulk-edit stocks, append rows in the form symbol,isin,exchange,name, then commit changes. The update workflow will fetch their data.</footer>
 <script>
-let stocks=[],key='1y',ascending=true;const el=x=>document.getElementById(x);
+let stocks=[],key='1y',ascending=true,board=(location.hash==='#short-term'?'short':'main');const el=x=>document.getElementById(x);
 const safe=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const value=(r,k)=>['1m','3m','6m','1y'].includes(k)?r.lows?.[k]:r[k];
 const matchingLows=r=>r.status!=='ok'||!Number.isFinite(r.price)?[]:['1m','3m','6m','1y'].filter(k=>Number.isFinite(r.lows?.[k])&&Math.abs(r.price-r.lows[k])<=Math.max(0.0001,Math.abs(r.price)*0.0000001));
@@ -44,17 +44,31 @@ let term=el('search').value.trim().toLowerCase(), period=el('period').value, fil
 let rows=stocks.filter(r=>[r.symbol,r.isin,r.name,r.exchange,r.provider_symbol].join(' ').toLowerCase().includes(term));
 rows=rows.filter(r=>filter==='all'||(filter==='missing'?r.status!=='ok':filter==='near'?value(r,period)!=null&&r.price!=null&&r.price<=value(r,period)*1.10:value(r,period)!=null&&r.price!=null&&r.price>value(r,period)*1.10));
 rows.sort((a,b)=>{let x=value(a,key),y=value(b,key);if(x==null)return 1;if(y==null)return -1;return (typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y)))*(ascending?1:-1)});
+el('emptyhint').style.display=board==='short'&&stocks.length===0?'block':'none';
 el('rows').innerHTML=rows.map(r=>'<tr><td><b>'+safe(r.symbol)+'</b></td><td>'+safe(r.name)+'<div class="muted">'+safe(r.isin)+'</div></td><td>'+safe(r.exchange)+'</td><td class="'+(atLongTermLow(r)?'at-multiperiod-low':'')+'" title="'+(atLongTermLow(r)?'Matches lowest closing price for: '+matchingLows(r).join(', '):'')+'">'+(r.price==null?'—':safe(Number(r.price).toLocaleString(undefined,{maximumFractionDigits:4}))+' '+safe(r.currency||''))+redLowMarkup(r)+'</td>'+['1m','3m','6m','1y'].map(k=>'<td class="'+(value(r,k)==null?'muted':r.price!=null&&value(r,k)!=null&&r.price<=value(r,k)*1.10?'positive':'muted')+'">'+money(value(r,k),r.currency)+'</td>').join('')+'</tr>').join('');
 el('message').textContent='Showing all '+rows.length+' matching stocks ('+stocks.length+' total) on one page';
 }
+function setBoard(next){
+board=next;
+el('main-tab').classList.toggle('active',board==='main');
+el('short-tab').classList.toggle('active',board==='short');
+el('board-title').textContent=board==='main'?'Market Pulse — Price Lows':'Short-Term Stock Screener';
+el('add-stocks').href='https://github.com/JayatiJaiswal/stock-market-screener/edit/main/'+(board==='main'?'stocks.csv':'stocks-short-term.csv');
+const target=board==='short'?'#short-term':'#main';
+if(location.hash!==target)history.replaceState(null,'',target);
+el('search').value='';
+el('filter').value='all';
+stocks=[];render();refresh();
+}
 async function refresh(){
-try {let response=await fetch('data.json?ts='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);
+try {let response=await fetch((board==='main'?'data.json':'short-term-data.json')+'?ts='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);
 let data=await response.json();stocks=data.stocks||[];const oldFormat=stocks.some(r=>r.returns&&!r.lows);render();
-if(oldFormat)el('message').textContent='Historical low prices have not been recalculated yet. The last saved data is still in the old percentage format. Run the Daily stock screener update GitHub Action; this dashboard intentionally does not display percentages.';else if(!data.updated_at)el('message').textContent='Ready for first data update. Run the GitHub Actions workflow.';
+if(oldFormat)el('message').textContent='Historical low prices have not been recalculated yet. The last saved data is still in the old percentage format. Run the Daily stock screener update GitHub Action; this dashboard intentionally does not display percentages.';else if(!data.updated_at&&stocks.length)el('message').textContent='Ready for first data update. Run the GitHub Actions workflow.';
 }catch(err){el('message').textContent='Unable to load price data: '+err.message}}
 for(const id of ['search','period','direction','filter'])el(id).addEventListener(id==='search'?'input':'change',()=>{if(id==='period'||id==='direction'){key=el('period').value;ascending=el('direction').value==='asc'}render()});
 document.querySelectorAll('th[data-key]').forEach(th=>th.onclick=()=>{const next=th.dataset.key;ascending=key===next?!ascending:true;key=next;render()});
+el('main-tab').onclick=()=>setBoard('main');el('short-tab').onclick=()=>setBoard('short');
 el('refresh').onclick=refresh;
-el('export').onclick=()=>{let keys=['symbol','isin','exchange','name','price','currency','1m','3m','6m','1y'];let lines=[keys.join(','),...stocks.map(r=>keys.map(k=>JSON.stringify(value(r,k)??'')).join(','))];let blob=new Blob([lines.join('\n')],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='stock-screener.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
-refresh();
+el('export').onclick=()=>{let keys=['symbol','isin','exchange','name','price','currency','1m','3m','6m','1y'];let lines=[keys.join(','),...stocks.map(r=>keys.map(k=>JSON.stringify(value(r,k)??'')).join(','))];let blob=new Blob([lines.join('\n')],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=board==='short'?'short-term-stock-screener.csv':'stock-screener.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+setBoard(board);
 </script></main></body></html>
