@@ -1,4 +1,4 @@
-"""Daily historical stock screener using unofficial Yahoo Finance data."""
+"""Daily stock screener: actual lowest daily closing prices over each lookback window."""
 import argparse
 import csv
 import json
