@@ -57,12 +57,14 @@ def calculate(history):
         history.index = history.index.tz_localize(None)
     date = history.index[-1].date()
     current = float(history.iloc[-1])
-    returns = {}
+    lows = {}
     for label, months in [("1m", 1), ("3m", 3), ("6m", 6), ("1y", 12)]:
-        target = pd.Timestamp(date) - pd.DateOffset(months=months)
-        old = history.loc[history.index <= target]
-        returns[label] = round((current / float(old.iloc[-1]) - 1) * 100, 2) if len(old) and float(old.iloc[-1]) > 0 else None
-    return round(current,4), str(date), returns
+        start = pd.Timestamp(date) - pd.DateOffset(months=months)
+        window = history.loc[history.index >= start]
+        # Only show a minimum if the time series covers the whole requested period.
+        has_full_window = history.index[0] <= start
+        lows[label] = round(float(window.min()), 4) if has_full_window and not window.empty else None
+    return round(current, 4), str(date), lows
 
 def sync():
     rows = read_stocks()
@@ -75,16 +77,16 @@ def sync():
     results = []
     for i, row in enumerate(rows, 1):
         result = {**row, "provider_symbol":None, "price":None, "currency":None, "price_date":None,
-                  "returns":{"1m":None,"3m":None,"6m":None,"1y":None}, "status":"error", "error":None}
+                  "lows":{"1m":None,"3m":None,"6m":None,"1y":None}, "status":"error", "error":None}
         try:
             ticker = yahoo_symbol(row)
             result["provider_symbol"] = ticker
             security = yf.Ticker(ticker)
-            history = security.history(period="18mo", interval="1d", auto_adjust=True, actions=False)
+            history = security.history(period="18mo", interval="1d", auto_adjust=False, actions=False)
             if history.empty or "Close" not in history:
                 raise ValueError("No history; verify symbol and exchange")
-            price, date, returns = calculate(history["Close"])
-            result.update(price=price, price_date=date, returns=returns, status="ok")
+            price, date, lows = calculate(history["Close"])
+            result.update(price=price, price_date=date, lows=lows, status="ok")
             try:
                 result["currency"] = security.fast_info.currency
             except Exception:
@@ -93,7 +95,7 @@ def sync():
             result["error"] = str(exc)[:180]
             old = previous.get((row["symbol"], row["exchange"]))
             if old and old.get("price") is not None:
-                for field in ("price", "currency", "price_date", "returns"):
+                for field in ("price", "currency", "price_date", "lows"):
                     result[field] = old.get(field)
                 result["status"] = "stale"
         results.append(result)
