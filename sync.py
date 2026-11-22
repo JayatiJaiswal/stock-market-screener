@@ -67,45 +67,117 @@ def calculate(history):
     return round(current, 4), str(date), lows
 
 def sync():
+    """Fetch watchlist prices in batches, then write one complete snapshot.
+
+    Public price feeds can fail or throttle; preserve prior valid quotes as stale
+    instead of replacing them with missing values.
+    """
     rows = read_stocks()
     previous = {}
     if OUTPUT.exists():
         try:
-            previous = {(x["symbol"], x["exchange"]): x for x in json.loads(OUTPUT.read_text(encoding="utf-8")).get("stocks", [])}
+            previous = {
+                (x["symbol"], x["exchange"]): x
+                for x in json.loads(OUTPUT.read_text(encoding="utf-8")).get("stocks", [])
+            }
         except (ValueError, KeyError):
             pass
+
+    currency_by_exchange = {
+        "NASDAQ": "USD", "NYSE": "USD", "AMEX": "USD",
+        "AMS": "EUR", "BRU": "EUR", "PAR": "EUR", "GER": "EUR",
+        "XETRA": "EUR", "MIL": "EUR", "MAD": "EUR", "LSE": "GBp",
+        "SWX": "CHF", "STO": "SEK", "OSL": "NOK", "CPH": "DKK",
+        "HEL": "EUR", "ASX": "AUD", "TSX": "CAD",
+    }
     results = []
-    for i, row in enumerate(rows, 1):
-        result = {**row, "provider_symbol":None, "price":None, "currency":None, "price_date":None,
-                  "lows":{"1m":None,"3m":None,"6m":None,"1y":None}, "status":"error", "error":None}
+    ticker_rows = {}
+    for row in rows:
+        result = {
+            **row, "provider_symbol": None, "price": None,
+            "currency": currency_by_exchange.get(row["exchange"]),
+            "price_date": None, "lows": {
+                "1m": None, "3m": None, "6m": None, "1y": None,
+            }, "status": "error", "error": None,
+        }
         try:
             ticker = yahoo_symbol(row)
             result["provider_symbol"] = ticker
-            security = yf.Ticker(ticker)
-            history = security.history(period="18mo", interval="1d", auto_adjust=False, actions=False)
-            if history.empty or "Close" not in history:
-                raise ValueError("No history; verify symbol and exchange")
-            price, date, lows = calculate(history["Close"])
-            result.update(price=price, price_date=date, lows=lows, status="ok")
-            try:
-                result["currency"] = security.fast_info.currency
-            except Exception:
-                pass
+            ticker_rows.setdefault(ticker, []).append(result)
         except Exception as exc:
             result["error"] = str(exc)[:180]
-            old = previous.get((row["symbol"], row["exchange"]))
-            if old and old.get("price") is not None:
-                for field in ("price", "currency", "price_date", "lows"):
-                    result[field] = old.get(field)
-                result["status"] = "stale"
         results.append(result)
-        print(f'{i}/{len(rows)} {row["symbol"]}: {result["status"]}', flush=True)
-        if i % 50 == 0:
+
+    tickers = list(ticker_rows)
+    batch_size = 25
+    for start_idx in range(0, len(tickers), batch_size):
+        batch = tickers[start_idx : start_idx + batch_size]
+        print(f"Batch {start_idx // batch_size + 1}: {len(batch)} tickers", flush=True)
+        try:
+            data = yf.download(
+                tickers=batch, period="18mo", interval="1d",
+                auto_adjust=False, actions=False, group_by="ticker",
+                threads=False, progress=False, timeout=20,
+            )
+            for ticker in batch:
+                for result in ticker_rows[ticker]:
+                    try:
+                        if data.empty:
+                            raise ValueError("No data returned for batch")
+                        if isinstance(data.columns, pd.MultiIndex):
+                            # group_by=ticker yields (ticker, field). For
+                            # some yfinance versions single-ticker downloads
+                            # use (field, ticker); support both.
+                            if ticker in data.columns.get_level_values(0):
+                                frame = data[ticker]
+                            elif ticker in data.columns.get_level_values(1):
+                                frame = data.xs(ticker, axis=1, level=1)
+                            else:
+                                raise ValueError("Ticker missing from batch")
+                        else:
+                            if len(batch) != 1:
+                                raise ValueError("Unexpected response structure")
+                            frame = data
+                        if "Close" not in frame.columns:
+                            raise ValueError("No Close column")
+                        price, date, lows = calculate(frame["Close"])
+                        result.update(price=price, price_date=date, lows=lows, status="ok")
+                    except Exception as exc:
+                        result["error"] = str(exc)[:180]
+        except Exception as exc:
+            for ticker in batch:
+                for result in ticker_rows[ticker]:
+                    result["error"] = ("Batch error: " + str(exc))[:180]
+
+        # Write progress logs and pause to reduce burst rate.
+        successful = sum(
+            r["status"] == "ok"
+            for ticker in batch for r in ticker_rows[ticker]
+        )
+        print(f"Batch complete: {successful} / {len(batch)} rows", flush=True)
+        if start_idx + batch_size < len(tickers):
             time.sleep(3)
+
+    for result in results:
+        if result["status"] == "ok":
+            continue
+        old = previous.get((result["symbol"], result["exchange"]))
+        if old and old.get("price") is not None and old.get("lows"):
+            for field in ("price", "currency", "price_date", "lows"):
+                result[field] = old.get(field)
+            result["status"] = "stale"
+
     OUTPUT.parent.mkdir(exist_ok=True)
-    OUTPUT.write_text(json.dumps({"updated_at":datetime.now(timezone.utc).isoformat(),
-                 "total":len(results), "success":sum(x["status"]=="ok" for x in results),
-                 "stocks":results}, indent=2), encoding="utf-8")
+    temp = OUTPUT.with_suffix(".tmp")
+    temp.write_text(json.dumps({
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "total": len(results),
+        "success": sum(x["status"] == "ok" for x in results),
+        "stocks": results,
+    }, indent=2), encoding="utf-8")
+    temp.replace(OUTPUT)
+    print(f"Finished: {len(results)} stocks; "
+          f"{sum(x['status'] == 'ok' for x in results)} updated", flush=True)
 
 def add_stock(args):
     symbol = clean(args.symbol).split("|")[0].strip()
