@@ -6,9 +6,6 @@
 *{box-sizing:border-box}body{margin:0}main{max-width:1500px;margin:auto;padding:24px}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 h1{margin:0;font-size:30px}p,.muted{color:#637083}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
-.stat{padding:18px;border:1px solid #e5e8ed;border-radius:14px;background:white}
-.stat span{font-size:12px;color:#637083}.stat strong{display:block;font-size:24px;margin-top:8px}
 .controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
 input,select,button{padding:10px 12px;border:1px solid #d6dce7;background:white;border-radius:9px;font:inherit}
 input{flex:1;min-width:240px}button{cursor:pointer;font-weight:600}button:hover{background:#eef3ff}
@@ -22,10 +19,10 @@ th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
 .pill.stale{background:#fff0dc;color:#975500}.pill.error{background:#ffe9e9;color:#a02c33}
 #message{margin:14px 0;color:#9b6311}footer{font-size:12px;color:#687589;line-height:1.6;margin-top:22px}
 a{color:#265cb5}.action-link{display:inline-block;padding:10px 12px;border:1px solid #d6dce7;border-radius:9px;background:#fff;text-decoration:none;font-weight:600}.pager{display:flex;align-items:center;justify-content:center;gap:12px;margin:12px 0}.pager button:disabled{opacity:.45;cursor:default}
-@media(max-width:650px){main{padding:12px}.stats{grid-template-columns:repeat(2,1fr)}h1{font-size:23px}}
+@media(max-width:650px){main{padding:12px}h1{font-size:23px}}
 </style></head><body><main>
 <header><div><h1>Market Pulse — Price Lows</h1><p>Lowest closing prices · 1M / 3M / 6M / 1Y</p></div><div><a class="action-link" href="https://github.com/JayatiJaiswal/stock-market-screener/edit/main/stocks.csv" target="_blank" rel="noopener noreferrer" title="Add multiple rows using Symbol, ISIN, Exchange and Name">+ Add / bulk-edit stocks</a> <button id="refresh">Refresh display</button> <button id="export">Export CSV</button></div></header>
-<section class="stats"><div class="stat"><span>Tracked stocks</span><strong id="total">—</strong></div><div class="stat"><span>Updated successfully</span><strong id="success">—</strong></div><div class="stat"><span>At a period low (red)</span><strong id="falling">—</strong></div><div class="stat"><span>Last sync (UTC)</span><strong id="updated" style="font-size:16px">—</strong></div></section>
+
 <div class="controls"><input id="search" placeholder="Search symbol, ISIN, company or exchange">
 <select id="period"><option value="1y">1-year low</option><option value="6m">6-month low</option><option value="3m">3-month low</option><option value="1m">1-month low</option></select>
 <select id="direction"><option value="asc">Lowest price first</option><option value="desc">Highest price first</option></select>
@@ -51,7 +48,7 @@ el('message').textContent='Showing all '+rows.length+' matching stocks ('+stocks
 }
 async function refresh(){
 try {let response=await fetch('data.json?ts='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);
-let data=await response.json();stocks=data.stocks||[];const oldFormat=stocks.some(r=>r.returns&&!r.lows);el('total').textContent=data.total??stocks.length;el('success').textContent=data.success??0;el('falling').textContent=stocks.filter(atLongTermLow).length;el('updated').textContent=data.updated_at?new Date(data.updated_at).toLocaleString('en-GB',{timeZone:'UTC',dateStyle:'medium',timeStyle:'short'})+' UTC':'Not yet synced';render();
+let data=await response.json();stocks=data.stocks||[];const oldFormat=stocks.some(r=>r.returns&&!r.lows);render();
 if(oldFormat)el('message').textContent='Historical low prices have not been recalculated yet. The last saved data is still in the old percentage format. Run the Daily stock screener update GitHub Action; this dashboard intentionally does not display percentages.';else if(!data.updated_at)el('message').textContent='Ready for first data update. Run the GitHub Actions workflow.';
 }catch(err){el('message').textContent='Unable to load price data: '+err.message}}
 for(const id of ['search','period','direction','filter'])el(id).addEventListener(id==='search'?'input':'change',()=>{if(id==='period'||id==='direction'){key=el('period').value;ascending=el('direction').value==='asc'}render()});
