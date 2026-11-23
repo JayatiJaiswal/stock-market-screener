@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-22T14:10:15.632882+00:00",
+  "updated_at": "2026-11-23T23:36:05.038715+00:00",
   "total": 7,
   "success": 7,
   "stocks": [
@@ -9,12 +9,12 @@
       "exchange": "NASDAQ",
       "name": "Apple",
       "provider_symbol": "AAPL",
-      "price": 342.56,
+      "price": 349.08,
       "currency": "USD",
-      "price_date": "2026-11-20",
+      "price_date": "2026-11-23",
       "lows": {
         "1m": 331.9,
-        "3m": 309.35,
+        "3m": 309.9,
         "6m": 275.15,
         "1y": 246.63
       },
@@ -27,12 +27,12 @@
       "exchange": "NASDAQ",
       "name": "Microsoft",
       "provider_symbol": "MSFT",
-      "price": 484.52,
+      "price": 492.5,
       "currency": "USD",
-      "price_date": "2026-11-20",
+      "price_date": "2026-11-23",
       "lows": {
         "1m": 484.52,
-        "3m": 481.15,
+        "3m": 484.52,
         "6m": 352.83,
         "1y": 352.83
       },
@@ -117,11 +117,11 @@
       "exchange": "LSE",
       "name": "AstraZeneca",
       "provider_symbol": "AZN.L",
-      "price": 13412.0,
+      "price": 13540.0,
       "currency": "GBp",
-      "price_date": "2026-11-20",
+      "price_date": "2026-11-23",
       "lows": {
-        "1m": 12614.0,
+        "1m": 12764.0,
         "3m": 11650.0,
         "6m": 11460.0,
         "1y": 11460.0
