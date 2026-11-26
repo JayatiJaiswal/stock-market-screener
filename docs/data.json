@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-25T23:35:59.741867+00:00",
+  "updated_at": "2026-11-26T23:36:15.714462+00:00",
   "total": 7,
   "success": 7,
   "stocks": [
@@ -45,14 +45,14 @@
       "exchange": "AMS",
       "name": "ASML",
       "provider_symbol": "ASML.AS",
-      "price": 1201.2,
+      "price": 1131.6,
       "currency": "EUR",
-      "price_date": "2026-11-24",
+      "price_date": "2026-11-25",
       "lows": {
-        "1m": 1168.0,
-        "3m": 1168.0,
-        "6m": 1168.0,
-        "1y": 858.8
+        "1m": 1131.6,
+        "3m": 1131.6,
+        "6m": 1131.6,
+        "1y": 860.3
       },
       "status": "ok",
       "error": null
@@ -63,9 +63,9 @@
       "exchange": "GER",
       "name": "Beiersdorf",
       "provider_symbol": "BEI.DE",
-      "price": 80.66,
+      "price": 82.46,
       "currency": "EUR",
-      "price_date": "2026-11-24",
+      "price_date": "2026-11-25",
       "lows": {
         "1m": 79.0,
         "3m": 73.32,
@@ -81,14 +81,14 @@
       "exchange": "PAR",
       "name": "BNP Paribas",
       "provider_symbol": "BNP.PA",
-      "price": 90.28,
+      "price": 88.22,
       "currency": "EUR",
-      "price_date": "2026-11-24",
+      "price_date": "2026-11-25",
       "lows": {
         "1m": 85.55,
         "3m": 82.57,
         "6m": 82.57,
-        "1y": 70.42
+        "1y": 71.77
       },
       "status": "ok",
       "error": null
@@ -99,9 +99,9 @@
       "exchange": "BRU",
       "name": "argenx SE",
       "provider_symbol": "ARGX.BR",
-      "price": 891.2,
+      "price": 863.2,
       "currency": "EUR",
-      "price_date": "2026-11-24",
+      "price_date": "2026-11-25",
       "lows": {
         "1m": 780.2,
         "3m": 705.6,
@@ -117,9 +117,9 @@
       "exchange": "LSE",
       "name": "AstraZeneca",
       "provider_symbol": "AZN.L",
-      "price": 13926.0,
+      "price": 14010.0,
       "currency": "GBp",
-      "price_date": "2026-11-25",
+      "price_date": "2026-11-26",
       "lows": {
         "1m": 12764.0,
         "3m": 11650.0,
